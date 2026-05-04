@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import requests
 import pandas as pd
@@ -5,7 +6,7 @@ import plotly.express as px
 from datetime import datetime, date
 
 # Config
-API_BASE = "https://team-task-xxx.up.railway.app"
+API_BASE = os.getenv("API_BASE", "http://localhost:8000")
 st.set_page_config(page_title="Team Task Manager", layout="wide")
 
 # Simple Session-based Auth (No external library)
