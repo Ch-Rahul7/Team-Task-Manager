@@ -5,7 +5,7 @@ import plotly.express as px
 from datetime import datetime, date
 
 # Config
-API_BASE = "https://team-task-xxx.up.railway.app"
+API_BASE = "https://team-task-manager-production-cc44.up.railway.app"
 st.set_page_config(page_title="Team Task Manager", layout="wide")
 
 # Simple Session-based Auth (No external library)
