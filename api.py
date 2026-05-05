@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware  # ← CORS ADDED!
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from typing import List
 from datetime import datetime
 
-# ✅ FIXED IMPORTS - No circular imports
-from database import get_db
+# FIXED IMPORTS
+from database import get_db, init_db  # ← init_db imported
 from models import User, Project, Task
 import auth
 from schemas import (
@@ -20,7 +21,17 @@ from schemas import (
     TaskUpdate
 )
 
-app = FastAPI(title="Team Task Manager API")
+app = FastAPI(title="Team Task Manager API", version="1.0.0")
+
+# CORS - Frontend access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Production: ["https://your-streamlit.app"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 security = HTTPBearer()
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
@@ -35,6 +46,12 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         return user
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+# STARTUP EVENT - DB INIT!
+@app.on_event("startup")
+async def startup_event():
+    init_db()
+    print("✅ Database tables created!")
 
 @app.post("/auth/register", response_model=UserSchema)
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -110,10 +127,8 @@ def update_task(task_id: int, task_update: TaskUpdate, current_user=Depends(get_
 
 @app.get("/")
 def read_root():
-    return {"message": "Team Task Manager API ✅ Running!"}
+    return {"message": "Team Task Manager API ✅ Running on Railway!"}
 
 if __name__ == "__main__":
     import uvicorn
-    from database import init_db
-    init_db()
     uvicorn.run(app, host="0.0.0.0", port=8000)
