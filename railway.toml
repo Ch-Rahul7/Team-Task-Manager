@@ -2,6 +2,13 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "uvicorn api:app --host 0.0.0.0 --port $PORT"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+
+[[services]]
+name = "team-task-manager-backend"
+startCommand = "uvicorn api:app --host 0.0.0.0 --port $PORT"
+
+[[services]]
+name = "team-task-manager-frontend"
+startCommand = "streamlit run app.py --server.port $PORT --server.address 0.0.0.0"
