@@ -78,8 +78,16 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     
     access_token = auth.create_access_token(data={"user_id": db_user.id})
-    return {"access_token": access_token, "token_type": "bearer", "user": db_user}
-
+    return {
+    "access_token": access_token,
+    "token_type": "bearer",
+    "user": {
+        "id": db_user.id,
+        "email": db_user.email,
+        "username": db_user.username,
+        "role": db_user.role,
+    }
+}
 @app.post("/projects", response_model=ProjectSchema)
 def create_project(project: ProjectCreate, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     if current_user.role != "admin":
